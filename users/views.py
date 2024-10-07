@@ -4,16 +4,17 @@ import jwt, datetime
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from tutorial.quickstart.serializers import UserSerializer
 
 from .models import User
-from .serializers import Userserializer
+from .serializers import UserSerializer
 
 
 
 # Create your views here.
 class RegisterView(APIView):
     def post(self, request):
-        serializer = Userserializer(data=request.data)
+        serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
@@ -38,7 +39,26 @@ class LoginView(APIView):
         }
         token = jwt.encode(payload, 'secret', algorithm='HS256').decode('utf-8')
 
-        return Response({
-            'jwt': token
-        })
+        response = Response()
 
+        response.set_cookie(key='jwt', value=token, httponly=True)
+        response.data = {
+            'jwt': token
+        }
+
+        return response
+
+class UserView(APIView):
+    def get(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed('Notauthorised')
+
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed('Notauthorised')
+        user = User.objects.filter(id = payload['id']).first()
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
