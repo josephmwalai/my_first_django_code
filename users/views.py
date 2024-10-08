@@ -1,5 +1,3 @@
-from email.message import Message
-
 import jwt, datetime
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
@@ -62,3 +60,12 @@ class UserView(APIView):
         user = User.objects.filter(id = payload['id']).first()
         serializer = UserSerializer(user)
         return Response(serializer.data)
+
+class LogoutView(APIView):
+    def post(self, request):
+        response = Response()
+        response.delete_cookie('jwt')
+        response.data = {
+            'message': 'Logout Successfully'
+        }
+        return response
