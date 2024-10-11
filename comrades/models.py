@@ -13,7 +13,7 @@ class Comrades(models.Model):
     name = models.CharField(max_length=255)
     email = models.EmailField(max_length=255, unique=True)
     semester =models.IntegerField()
-    academic_year = models.IntegerField(max_length=50)
+    academic_year = models.IntegerField()
     course = models.CharField(max_length=255)
     year_in_school = models.CharField(max_length=20, choices=YearInSchool,default=YearInSchool.FRESHMAN)
 
