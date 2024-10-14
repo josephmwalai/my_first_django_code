@@ -17,9 +17,13 @@ class DepartmentListView(APIView):
 
 class CoursesOfferedView(APIView):
     def get(self, request, department_id, *args, **kwargs):
-        courses = CoursesOffered.objects.filter(department_id=department_id)
-        serializer = CoursesOfferedSerializer(courses, many=True)
-        return Response(serializer.data)
+        try:
+            courses = CoursesOffered.objects.filter(departments=department_id)
+            serializer = CoursesOfferedSerializer(courses, many=True)
+            return Response(serializer.data)
+        except CoursesOffered.DoesNotExist:
+            return Response({"message": "No Courses Found For This Department."})
+
 
 class DepartmentCreateView(APIView):
     def post(self, request, *args, **kwargs):
